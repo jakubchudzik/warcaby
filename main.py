@@ -1,16 +1,34 @@
-# This is a sample Python script.
+import pygame
+from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE
+from checkers.board import Board
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+FPS = 60
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Warcaby')
+
+def get_row_col_from_mouse(pos):
+    x, y = pos
+    row = y // SQUARE_SIZE
+    col = x // SQUARE_SIZE
+    return row, col
+
+def main():
+    run = True
+    clock = pygame.time.Clock()
+    board = Board()
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('tutaj')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                row, col = get_row_col_from_mouse(pos)
+                piece = board.get_piece(row, col)
+                board.move(piece,4,3)
+        board.draw(WIN)
+        pygame.display.update()
+    pygame.quit()
+main()
