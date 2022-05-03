@@ -6,7 +6,6 @@ from .piece import Piece
 class Board:
     def __init__(self):
         self.board = []
-        self.selcted_piece = None
         self.red_left = self.white_left = 12
         self.red_kings = self.white_kings = 0
         self.create_board()
@@ -50,3 +49,46 @@ class Board:
                 piece = self.board[row][col]
                 if piece != 0:
                     piece.draw(win)
+
+    def get_valid_moves(self,piece):
+        moves = {}
+        left = piece.col - 1
+        right = piece.col + 1
+        row = piece.row
+
+        if piece.color == RED or piece.king:
+            moves.update(self._traverse_left(row - 1, max(row-3,-1),-1,piece.color,left))
+            moves.update(self._traverse_right(row - 1, max(row - 3, -1), -1, piece.color, right))
+        if piece.color == WHITE or piece.king:
+            moves.update(self._traverse_left(row + 1, max(row + 3, ROWS), 1, piece.color, left))
+            moves.update(self._traverse_right(row + 1, max(row + 3, ROWS), 1, piece.color, right))
+
+        return moves
+    def _traverse_left(self, start, stop, step, color, left, skipped=[]):
+        moves = {}
+        last = []
+        for r in range(start, stop, step):
+            if left < 0:
+                break
+            current = self.board.get_piece(r, left)
+            if current == 0: # sprawdzam czy pole jest puste
+                if skipped and not last:
+                    break
+                elif skip_only:
+                    pass
+                else:
+                    moves[(r,left)] = last
+                if last:
+                    if step == -1:
+                        row = max(r-3, 0)
+                    else:
+                        row = min(r+r,ROWS)
+            elif current.color == color: # sprawdzam, czy w polu nie ma bierki o tym samym kolorze- wtedy nie mogę zrobic ruchu
+                break
+            else:
+                last = [current]
+
+            left -= 1
+
+    def _traverse_right(self, start, stop, step, color, right, skipped=[]):
+        pass
