@@ -17,7 +17,7 @@ class Game:
     def _init(self):
         self.selected = None
         self.board = Board()
-        self.turn = RED
+        self.turn = WHITE
         self.valid_moves = {}
     def reset(self):
         self._init()
