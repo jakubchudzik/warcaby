@@ -36,6 +36,19 @@ class Game:
         if piece != 0 and piece.color == self.turn:
             self.selected = piece
             self.valid_moves = self.board.get_valid_moves(piece)
+
+            maxi = 0
+            for m in self.valid_moves:
+                if len(self.valid_moves[m])>maxi:
+                    maxi = len(self.valid_moves[m])
+            temp_list = []
+            for m in self.valid_moves:
+                if len(self.valid_moves[m])<maxi:
+                    temp_list.append(m)
+            for i in temp_list:
+                self.valid_moves.pop(i)
+            print(self.valid_moves)
+            print()
             return True
 
         return False
