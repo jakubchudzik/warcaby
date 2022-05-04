@@ -97,6 +97,7 @@ class Board:
             current = self.board[r][left]
             if current == 0:
                 if skipped and not last:
+
                     break
                 elif skipped:
                     moves[(r, left)] = last + skipped
