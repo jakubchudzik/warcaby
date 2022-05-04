@@ -68,6 +68,7 @@ class Board:
                     self.white_left -= 1
     def get_valid_moves(self, piece):
         moves = {}
+        #kupa
         left = piece.col - 1
         right = piece.col + 1
         row = piece.row
