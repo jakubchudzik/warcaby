@@ -9,12 +9,15 @@ class Board:
         self.red_left = self.white_left = 12
         self.red_kings = self.white_kings = 0
         self.create_board()
+        self.tours_with_king = 0
 
     def winner(self):
         if self.red_left <= 0:
             return WHITE
         elif self.white_left <= 0:
             return RED
+        if self.tours_with_king>14:
+            return "DRAW"
     def draw_squares(self, win):
         win.fill(BLACK)
         for row in range(ROWS):
@@ -22,6 +25,9 @@ class Board:
                 pygame.draw.rect(win, GREY, (row * SQUARE_SIZE, col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
     def move(self, piece, row, col):
+        print(self.tours_with_king)
+        if self.red_kings > 0 or self.white_kings > 0:
+            self.tours_with_king+=1
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
         piece.move(row, col)
 
@@ -70,11 +76,47 @@ class Board:
                     self.red_left -= 1
                 else:
                     self.white_left -= 1
+
+    def get_valid_moves_without_recursion(self, piece):
+        moves = {}
+        left = piece.col - 1
+        right = piece.col + 1
+        row = piece.row
+
+        if piece.color == RED or piece.king:
+            moves.update(self._traverse_left(row + 1, ROWS, 1, piece.color, left, piece.king))
+            moves.update(self._traverse_right(row + 1, ROWS, 1, piece.color, right, piece.king))
+
+            # sprawdzanie bicia w tył
+            piece_op = self.get_piece(piece.row - 1, piece.col - 1)
+            if piece_op != 0 and piece_op.color == WHITE:
+                moves.update(self._traverse_left(row - 1, max(row - 3, -1), -1, piece.color, left, piece.king))
+            piece_op = self.get_piece(piece.row - 1, piece.col + 1)
+            if piece_op != 0 and piece_op.color == WHITE:
+                moves.update(self._traverse_right(row - 1, max(row - 3, -1), -1, piece.color, right, piece.king))
+
+        if piece.color == WHITE or piece.king:
+            moves.update(self._traverse_left(row - 1, min(row - 3, -1), -1, piece.color, left, piece.king))
+            moves.update(self._traverse_right(row - 1, min(row - 3, -1), -1, piece.color, right, piece.king))
+
+            # sprawdzanie bicia w tył
+            piece_op = self.get_piece(piece.row + 1, piece.col - 1)
+            if piece_op != 0 and piece_op.color == RED:
+                moves.update(self._traverse_left(row + 1, min(row + 3, ROWS), 1, piece.color, left, piece.king))
+            piece_op = self.get_piece(piece.row + 1, piece.col + 1)
+            if piece_op != 0 and piece_op.color == RED:
+                moves.update(self._traverse_right(row + 1, min(row + 3, ROWS), 1, piece.color, right, piece.king))
+        if piece.king:
+            pass
+
+        return moves
     def get_valid_moves(self, piece):
         moves = {}
         left = piece.col - 1
         right = piece.col + 1
         row = piece.row
+
+
 
         if piece.color == RED or piece.king:
             moves.update(self._traverse_left(row + 1, ROWS, 1, piece.color, left,piece.king))
@@ -101,11 +143,19 @@ class Board:
                 moves.update(self._traverse_right(row + 1, min(row + 3, ROWS), 1, piece.color, right,piece.king))
         if piece.king:
             pass
-
-
+        maxi = 0
+        for i in moves:
+            if len(moves[i])>maxi:
+                maxi = len(moves[i])
+        for i in self.board:
+            for j in i:
+                    if j != 0 and piece.color == j.color and (piece.col != j.col or piece.row != j.row):
+                        pom_dic = self.get_valid_moves_without_recursion(j)
+                        for k in pom_dic:
+                            if len(pom_dic[k])>maxi:
+                                return {}
         return moves
 
-    # def _traverse_king(self, row, col, color):
 
     def _traverse_left(self, start, stop, step, color, left, isKing, skipped=[]):
         moves = {}
